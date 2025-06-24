@@ -198,3 +198,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d77caeab12193674f881b3bdd6122448, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _prefabBall: {fileID: 728105749068776634, guid: 148c3e1a77fac3e49aa7fe8c43e38d3d, type: 3}
+  _prefabPhysxBall: {fileID: 7369570098656820065, guid: 6c90b65c4d1bd844d940ff75e6d823b5, type: 3}

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Fusion.Addons.Physics;
 
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -21,6 +22,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         // Create the Fusion runner and let it know that we will be providing user input
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
+        gameObject.AddComponent<RunnerSimulatePhysics3D>(); // 3D 물리 시뮬레이션을 사용하기 위한 컴포넌트 추가!!(이거 없으면 PhysxBall같은 물리 이동 뚝뚝 끊김)
+
 
         // Create the NetworkSceneInfo from the current scene
         var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
@@ -57,7 +60,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     }
     #endregion
 
-
+    #region 세션 참여/나가기
     [SerializeField] private NetworkPrefabRef _playerPrefab;
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
@@ -84,6 +87,17 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             _spawnedCharacters.Remove(player);
         }
     }
+    #endregion
+
+    #region 사용자 입력 처리
+    private bool _mouseButton0;
+    private bool _mouseButton1;
+    private void Update()
+    {
+        // 마우스 입력 폴링
+        _mouseButton0 = _mouseButton0 || Input.GetMouseButton(0);
+        _mouseButton1 = _mouseButton1 || Input.GetMouseButton(1);
+    }
 
     // Fusion에 의해 폴링될 때 사용자로부터 입력 수집함
     public void OnInput(NetworkRunner runner, NetworkInput input)
@@ -102,8 +116,15 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (Input.GetKey(KeyCode.D))
             data.direction += Vector3.right;
 
+        data.buttons.Set(NetworkInputData.MOUSEBUTTON0, _mouseButton0);
+        _mouseButton0 = false;
+        data.buttons.Set(NetworkInputData.MOUSEBUTTON1, _mouseButton1);
+        _mouseButton1 = false;
+
         input.Set(data);
     }
+    #endregion
+
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
